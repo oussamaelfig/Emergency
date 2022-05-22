@@ -1,8 +1,8 @@
 
 module Main where
     import System.Environment ( getArgs )
-    import Data.List
 
+    import Data.List
     -- Constantes :
     tcMinimum = 1
     tcParDefaut = 15
@@ -66,8 +66,6 @@ module Main where
     parserInt :: [[String]] -> [[Int]]
     parserInt = map (map (read :: String -> Int))
     
-    sortLGT :: [[Int]] -> [[Int]]
     sortLGT x y = compare (x!!2) (y!!2) -- compare priorities 
         <> compare (y!!1) (x!!1) -- compare time in descending order
         
-    sortBy sortLGT parserInt
