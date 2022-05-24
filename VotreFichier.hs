@@ -40,8 +40,12 @@ module Main where
     --        Cette fonction retourne la chaîne de caractères qui sera affichée
     --        a la fin de l'exécution du programme.  Elle devra contenir le nouvel
     --        ordre des patients et la table des fractiles formatés pour l'affichage.
-    --traitement :: Int -> String -> String
-    --traitement tc contenu = 
+    traitement :: Int -> String -> String
+    traitement tc contenu = 
+
+    
+
+
 
 
 
