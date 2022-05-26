@@ -67,3 +67,8 @@
                                                 -- 3 25545 5
     premiereRegle :: String -> IO ()
     premiereRegle x = display (convertTuple (sortString x))
+
+
+
+    --Pour tester :
+    -- premiereRegle "43525 5 2\n25545 7 5\n7455 3 4"
