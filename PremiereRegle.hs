@@ -35,16 +35,10 @@
     sortString x = sortBy sortLGT (parserInt (formaterDonnes2 (formaterDonnes x)))
 
 
-
-    --Creation d'un data Type Patient
-    data Patient = Patient { patientId :: Int, patientTemps :: Int, patientPriorite :: Int } deriving (Show)
-
-
-
     --Convertir ma liste des listes de Int en une liste de Tuples contenant les éléments à afficher
     --[[43525,5,2],[7455,3,4],[25545,7,5]] --> [(1,43525,5),(2,7455,3),(3,25545,7)]
     convertTuple :: [[Int]] -> [(Int, Int, Int)]
-    convertTuple (x:xs) = zipWith (curry (\x -> (fst x,(snd x)!!0, (snd x)!!2))) [1..] (x:xs)
+    convertTuple (x:xs) = zipWith (curry (\x -> (fst x,head (snd x), snd x!!2))) [1..] (x:xs)
 
 
 
@@ -72,3 +66,18 @@
 
     --Pour tester :
     -- premiereRegle "43525 5 2\n25545 7 5\n7455 3 4"
+
+
+
+    --Creation d'un data Type Patient
+    data Patient = Patient { patientId :: Int, patientTemps :: Int, patientPriorite :: Int } deriving (Show)
+
+
+    --cette fonction prend la liste des lists de Int et la convertit en une liste des patients
+    -- [[1234, 5, 2], [4568, 7, 3], [7897, 6, 5]] ==>[
+                                                     --Patient {patientId = 1234, patientTemps = 5, patientPriorite = 2},
+                                                     --Patient {patientId = 4568, patientTemps = 7, patientPriorite = 3},
+                                                     --Patient {patientId = 7897, patientTemps = 6, patientPriorite = 5}
+                                                     --]
+    creerListPatient :: [[Int]] -> [Patient]
+    creerListPatient = map (\[a, b, c] -> Patient a b c)
