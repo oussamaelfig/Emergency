@@ -81,3 +81,6 @@
                                                      --]
     creerListPatient :: [[Int]] -> [Patient]
     creerListPatient = map (\[a, b, c] -> Patient a b c)
+
+
+    
