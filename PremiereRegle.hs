@@ -1,5 +1,4 @@
-    import Data.List ( elemIndex, sortBy )
-
+    import Data.List ( elemIndex, sortBy, groupBy )
     --Fonction qui prends la chaine et la convertis en liste de chaque ligne
     --"43525 5 2\n25545 7 5\n7455 3 4" --> [43525 5 2, 25545 7 5, 7455 3 4]
     formaterDonnes :: String -> [String]
@@ -89,10 +88,23 @@
     priorite3 = 30
     priorite4 = 60
     priorite5 = 120
-    tempsAttente = 15
+    tempsAttenteParDefaut = 15
 
-
+    --Fonction qui retourne une liste de tuples qui contient l'information de temps d'attente pour chaque patient
+    -- [[43525,3,2],[43615,2,2],[41111,1,2],[74855,5,3],[25545,4,3],[83115,7,4],[31115,6,4],[10305,8,5]]
+    -- [(3,2),(17,2),(31,2),(50,3),(64,3),(82,4),(96,4),(113,5)]
+    -- f(i+1)=t_a(i+1) + i*tempsAttenteParDefaut 
     tupleInfo :: [[Int]] -> [(Int,Int)]
     tupleInfo [[]] = []
     tupleInfo [[_,x,y]] = [(x,y)]
-    tupleInfo list =  zipWith (\[_,x,y] i -> (x+tempsAttente*i,y)) list [0..]
+    tupleInfo list =  zipWith (\[_,x,y] i -> (x+tempsAttenteParDefaut*i,y)) list [0..]
+
+
+    --groupBy :: ((a0, a2) -> (a1, a2) -> Bool) -> t0 -> [[(Int, Int)]]
+
+    --Grouper les elements par prioritée chaque priorité dans une liste à part
+    --[(3,2),(17,2),(50,3),(64,3)] ==> [[(3,2),(17,2)],[(50,3),(64,3)]]
+    groupElemMemePriorite :: [(Int,Int)] -> [[(Int,Int)]]
+    groupElemMemePriorite = groupBy (\x y -> snd x == snd y)
+
+
