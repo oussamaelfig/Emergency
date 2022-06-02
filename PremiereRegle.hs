@@ -38,7 +38,8 @@
     --Convertir ma liste des listes de Int en une liste de Tuples contenant les éléments à afficher
     --[[43525,5,2],[7455,3,4],[25545,7,5]] --> [(1,43525,5),(2,7455,3),(3,25545,7)]
     convertTuple :: [[Int]] -> [(Int, Int, Int)]
-    convertTuple (x:xs) = zipWith (curry (\x -> (fst x,head (snd x), snd x!!2))) [1..] (x:xs)
+    --convertTuple (x:xs) = zipWith (curry (\x -> (fst x,head (snd x), snd x!!2))) [1..] (x:xs)
+    convertTuple = zipWith (\i (a:b:_) -> (i, a, b)) [1..]
 
 
 
@@ -68,7 +69,6 @@
     -- premiereRegle "43525 5 2\n25545 7 5\n7455 3 4"
 
 
-
     --Creation d'un data Type Patient
     data Patient = Patient { patientId :: Int, patientTemps :: Int, patientPriorite :: Int } deriving (Show)
 
@@ -83,4 +83,16 @@
     creerListPatient = map (\[a, b, c] -> Patient a b c)
 
 
-    
+    --declaration des constantes: 
+    --temps d'attente maximum:
+    priorite2 = 15
+    priorite3 = 30
+    priorite4 = 60
+    priorite5 = 120
+    tempsAttente = 15
+
+
+    tupleInfo :: [[Int]] -> [(Int,Int)]
+    tupleInfo [[]] = []
+    tupleInfo [[_,x,y]] = [(x,y)]
+    tupleInfo list =  zipWith (\[_,x,y] i -> (x+tempsAttente*i,y)) list [0..]
