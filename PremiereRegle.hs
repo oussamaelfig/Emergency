@@ -108,3 +108,20 @@
     groupElemMemePriorite = groupBy (\x y -> snd x == snd y)
 
 
+    --comparAttente :: [[(Int,Int)]] -> [[Bool]]
+    --comparAttente [[(a,b):pairs]] | b == 2 &&  a > priorite2 : [[pairs]]
+
+
+    comparerTup :: (Int,Int) -> Bool
+    comparerTup (a, b)
+                        | b == 2 = a <= priorite2
+                        | b == 3 = a <= priorite3
+                        | b == 4 = a <= priorite4
+                        | b == 5 = a <= priorite5
+                        | otherwise = error "Error"
+
+    comparerParPriorite :: [[(Int, Int)]] -> [[Bool]]
+    comparerParPriorite = map (map comparerTup)
+
+    
+    
