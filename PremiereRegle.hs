@@ -109,10 +109,9 @@
     groupElemMemePriorite = groupBy (\x y -> snd x == snd y)
 
 
-    --comparAttente :: [[(Int,Int)]] -> [[Bool]]
-    --comparAttente [[(a,b):pairs]] | b == 2 &&  a > priorite2 : [[pairs]]
-
-
+    --Fonction pour comparer les temps d'attente avec les baremes posés pour chaque prioritée
+    --(3,2) ==> True
+    --(17,2) ==> False pcq 17<15
     comparerTup :: (Int,Int) -> Bool
     comparerTup (a, b)
                         | b == 2 = a <= priorite2
@@ -121,29 +120,42 @@
                         | b == 5 = a <= priorite5
                         | otherwise = error "Error"
 
+    --Fonction plus generale de comparerTup pour une liste complete
     comparerParPriorite :: [[(Int, Int)]] -> [[Bool]]
     comparerParPriorite = map (map comparerTup)
 
-
+    --Fonction qui prend une liste de boolean et compte le nombre
+    -- de True dans cette liste
+    -- [True,False,False] ==> 1
     listeNombreTrue :: [Bool] -> Int
     listeNombreTrue [] = 0
     listeNombreTrue [True] = 1
     listeNombreTrue [False] = 0
     listeNombreTrue (x:xs) = listeNombreTrue [x] + listeNombreTrue xs
 
-
+    --Fonction qui prends la liste de Boolean et retourne le nombre de True
+    --Ainsi la taille de la liste
+    --[True,False,False] ==> (1,3)
     donneeFractile :: [Bool] -> (Int,Int)
     donneeFractile xs = (listeNombreTrue xs, length xs)
 
-
+    --Fonction plus générale de donneeFractile
+    --[[TRUE, False, False], [FALSE, FALSE], [FALSE, FALSE], [TRUE]] ==> [(1,3), (0,2) , (0,2) , (1,1)]
     donneeFractileTout :: [[Bool]] -> [(Int,Int)]
     donneeFractileTout = map donneeFractile
 
+    --Fonction qui fait la division du premier element du tuple sur le deuxieme
+    --(3,5) ==> 0.6 
     divisionTuple :: (Int,Int) -> Double
     divisionTuple (a,b) =  int2Double a/int2Double b
 
+    --Fonction qui prend la liste des tuples et retourne les fractiles
+    --[(1,3), (0,2) , (0,2) , (1,1)] ==> [0.3,0,0,1]
     calculFractil :: [(Int,Int)] -> [Double]
     calculFractil = map divisionTuple
 
+
+    --Fonction qui calcule la moeyenne geometrique de la liste des fractile
+    --[0.3,0,0,1] ==> (0.3*0*0.1)^0.25 = 0
     calculMoyenneGeo :: [Double] -> Double
     calculMoyenneGeo list = product list ** 0.25
