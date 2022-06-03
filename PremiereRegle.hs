@@ -1,4 +1,5 @@
     import Data.List ( elemIndex, sortBy, groupBy )
+    import GHC.Float (int2Double)
     --Fonction qui prends la chaine et la convertis en liste de chaque ligne
     --"43525 5 2\n25545 7 5\n7455 3 4" --> [43525 5 2, 25545 7 5, 7455 3 4]
     formaterDonnes :: String -> [String]
@@ -123,5 +124,26 @@
     comparerParPriorite :: [[(Int, Int)]] -> [[Bool]]
     comparerParPriorite = map (map comparerTup)
 
-    
-    
+
+    listeNombreTrue :: [Bool] -> Int
+    listeNombreTrue [] = 0
+    listeNombreTrue [True] = 1
+    listeNombreTrue [False] = 0
+    listeNombreTrue (x:xs) = listeNombreTrue [x] + listeNombreTrue xs
+
+
+    donneeFractile :: [Bool] -> (Int,Int)
+    donneeFractile xs = (listeNombreTrue xs, length xs)
+
+
+    donneeFractileTout :: [[Bool]] -> [(Int,Int)]
+    donneeFractileTout = map donneeFractile
+
+    divisionTuple :: (Int,Int) -> Double
+    divisionTuple (a,b) =  int2Double a/int2Double b
+
+    calculFractil :: [(Int,Int)] -> [Double]
+    calculFractil = map divisionTuple
+
+    calculMoyenneGeo :: [Double] -> Double
+    calculMoyenneGeo list = product list ** 0.25
