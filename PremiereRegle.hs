@@ -1,5 +1,10 @@
     import Data.List ( elemIndex, sortBy, groupBy )
     import GHC.Float (int2Double)
+    import Data.Char  
+    import Text.Printf
+    import Control.Arrow
+    import Distribution.Compat.CharParsing (CharParsing(string))
+    
     --Fonction qui prends la chaine et la convertis en liste de chaque ligne
     --"43525 5 2\n25545 7 5\n7455 3 4" --> [43525 5 2, 25545 7 5, 7455 3 4]
     formaterDonnes :: String -> [String]
@@ -43,25 +48,22 @@
 
 
 
+    --Fonction qui prend un tuple et le rend à une liste de string
+    display :: (Int, Int, Int) -> String
+    display (a,b,c) = printf "%s" (show a++" "++show b++" "++show c)
+
+
     --Fonction qui va afficher ma liste des patients ordonnée
-    -- elle prend ma liste de Tuples et la converti en affichage
-    -- [(1,43525,5),(2,7455,3),(3,25545,7)] --> -- Indice IdPatient priorité
-                                                -- 1 43525 2
-                                                -- 2 7455 4
-                                                -- 3 25545 5
-    display :: [(Int, Int, Int)] -> IO ()
-    display = mapM_ (\(a,b,c) -> putStrLn (show a++" "++show b++" "++show c))
-
-
+    -- elle prend ma liste de Tuples et la converti en String
+    --[(1,43525,5),(2,7455,3),(3,25545,7)] --> ["1 43525 5","2 7455 3","3 25545 7"]
+    display' :: [(Int, Int, Int)] -> [String]
+    display' = map display
 
     --fonction qui combine toute les autres fonctions
     --prend la chaine initial et retourne la liste des patients ordonné
-    -- "43525 5 2\n25545 7 5\n7455 3 4" --> -- Indice IdPatient priorité
-                                                -- 1 43525 2
-                                                -- 2 7455 4
-                                                -- 3 25545 5
-    premiereRegle :: String -> IO ()
-    premiereRegle x = display (convertTuple (sortString x))
+    -- "43525 5 2\n25545 7 5\n7455 3 4" --> "1 43525 5\n2 7455 3\n3 25545 7\n"
+    premiereRegle :: String -> String
+    premiereRegle x = unlines (display' (convertTuple (sortString x)))
 
 
 
@@ -69,6 +71,9 @@
     -- premiereRegle "43525 5 2\n25545 7 5\n7455 3 4"
 
 
+
+
+    -- **************************************************************************************
     --Creation d'un data Type Patient
     data Patient = Patient { patientId :: Int, patientTemps :: Int, patientPriorite :: Int } deriving (Show)
 
@@ -82,7 +87,11 @@
     creerListPatient :: [[Int]] -> [Patient]
     creerListPatient = map (\[a, b, c] -> Patient a b c)
 
+    -- **************************************************************************************
 
+
+
+    
     --declaration des constantes: 
     --temps d'attente maximum:
     priorite2 = 15
@@ -95,10 +104,10 @@
     -- [[43525,3,2],[43615,2,2],[41111,1,2],[74855,5,3],[25545,4,3],[83115,7,4],[31115,6,4],[10305,8,5]]
     -- [(3,2),(17,2),(31,2),(50,3),(64,3),(82,4),(96,4),(113,5)]
     -- f(i+1)=t_a(i+1) + i*tempsAttenteParDefaut 
-    tupleInfo :: [[Int]] -> [(Int,Int)]
-    tupleInfo [[]] = []
-    tupleInfo [[_,x,y]] = [(x,y)]
-    tupleInfo list =  zipWith (\[_,x,y] i -> (x+tempsAttenteParDefaut*i,y)) list [0..]
+    tupleInfo :: [[Int]] -> Int -> [(Int,Int)]
+    tupleInfo [[]] a = []
+    tupleInfo [[_,x,y]] a = [(x,y)]
+    tupleInfo list a =  zipWith (\[_,x,y] i -> (x+a*i,y)) list [0..]
 
 
     --groupBy :: ((a0, a2) -> (a1, a2) -> Bool) -> t0 -> [[(Int, Int)]]
@@ -159,3 +168,15 @@
     --[0.3,0,0,1] ==> (0.3*0*0.1)^0.25 = 0
     calculMoyenneGeo :: [Double] -> Double
     calculMoyenneGeo list = product list ** 0.25
+
+
+    --Algorithme final pour trouver la moyenn geometrique
+    algoTriage ::Int -> String -> Double
+    algoTriage a chaine= calculMoyenneGeo(calculFractil (donneeFractileTout(comparerParPriorite (groupElemMemePriorite (tupleInfo (sortString chaine) a)))))
+
+    -------------------------------------------------------------------------------------------------------------------------------
+    -- premiereRegle "43525 5 2\n25545 7 5\n7455 3 4" *> print (algoTriage 20 "43525 5 2\n25545 7 5\n7455 3 4")
+    printResult :: Int -> String -> String
+    printResult a chaine = premiereRegle chaine ++ "--------\n" ++ printf "%.4f" (algoTriage a chaine)
+
+
