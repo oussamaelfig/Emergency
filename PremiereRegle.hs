@@ -250,7 +250,6 @@
     aPrioSur :: [Int] -> [Int] -> Bool
     aPrioSur xs ys
                 | xs!!3 < ys!!3 = True
-                | (xs!!3 > ys!!3) && (xs!!3 >= 0) && (ys!!3 < 0)= True
                 | (xs!!3 == ys!!3) && (xs!!2 < ys!!2) = True
                 | (xs!!3 == ys!!3) && (xs!!2 == ys!!2) && (xs!!1 >= ys!!1) = True
                 | otherwise = False
