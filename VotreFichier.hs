@@ -9,6 +9,7 @@ module Main where
     import Control.Arrow
     import Distribution.Compat.CharParsing (CharParsing(string))
 
+    
     -- Constantes :
     tcMinimum = 1
     tcParDefaut = 15
@@ -68,8 +69,29 @@ module Main where
     --Fonction principale qui fait appel à toute les autres fonctions
     --elle prend une chaine et la convertit en une liste des listes Int ordonée [[Int]]
     -- "43525 5 2\n25545 7 5\n7455 3 4" --> [[43525,5,2],[7455,3,4],[25545,7,5]]
+    sortStrings :: String -> [[Int]]
+    sortStrings x = sortBy sortLGT (parserInt (formaterDonnes2 (formaterDonnes x)))
+
+    ------------------------------------------------------------------------------------------------
+    -- Vérifications
+    ------------------------------------------------------------------------------------------------
+    -- verifPatient : vérifie que toute les informations relatives au patient sont valides
+    verifPatient :: [Int] -> [Int]
+    verifPatient [] = error "erreur de format"
+    verifPatient [x] = error "erreur de format"
+    verifPatient xs
+                | (1 <= (head xs)) && (1 <= xs!!1) && (2 <= xs!!2) && (xs!!2 <= 5) = xs
+                | otherwise = error "Données non valides"
+
+    -- verifAllPatient : vérifie les informations pour tous les patients
+    verifAllPatient :: [[Int]] -> [[Int]]
+    verifAllPatient = map verifPatient
+
+    -- sortString : fonction qui fait simplement appeler sortStrings, mais qui vérifie également
+    -- que les valeurs sont valides avec verifAllPatient, sinon une erreur est lancée
     sortString :: String -> [[Int]]
-    sortString x = sortBy sortLGT (parserInt (formaterDonnes2 (formaterDonnes x)))
+    sortString x = verifAllPatient (sortStrings x)
+    -------------------------------------------------------------------------------------------------
 
 
     --Convertir ma liste des listes de Int en une liste de Tuples contenant les éléments à afficher

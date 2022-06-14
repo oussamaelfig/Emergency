@@ -323,4 +323,20 @@
 
 
 
+    ------------------------------------------------------------------------------------------------
+    -- Vérifications
+    ------------------------------------------------------------------------------------------------
 
+    -- verifPatient : vérifie que toute les informations relatives au patient sont valides
+    verifPatient :: [Int] -> [Int]
+    verifPatient [] = error "erreur de format"
+    verifPatient [x] = error "erreur de format"
+    verifPatient xs
+                | (1 <= (head xs)) && (1 <= xs!!1) && (2 <= xs!!2) && (xs!!2 <= 5) = xs
+                | otherwise = error "Données non valides"
+
+    -- verifAllPatient : vérifie les informations pour tous les patients
+    verifAllPatient :: [[Int]] -> [[Int]]
+    verifAllPatient = map verifPatient
+
+    -------------------------------------------------------------------------------------------------
