@@ -1,10 +1,14 @@
+{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
     import Data.List ( elemIndex, sortBy, groupBy )
     import GHC.Float (int2Double)
-    import Data.Char  
+    import Data.Char
     import Text.Printf
     import Control.Arrow
     import Distribution.Compat.CharParsing (CharParsing(string))
-    
+
+
+
+
     --Fonction qui prends la chaine et la convertis en liste de chaque ligne
     --"43525 5 2\n25545 7 5\n7455 3 4" --> [43525 5 2, 25545 7 5, 7455 3 4]
     formaterDonnes :: String -> [String]
@@ -91,7 +95,7 @@
 
 
 
-    
+
     --declaration des constantes: 
     --temps d'attente maximum:
     priorite2 = 15
@@ -178,5 +182,127 @@
     -- premiereRegle "43525 5 2\n25545 7 5\n7455 3 4" *> print (algoTriage 20 "43525 5 2\n25545 7 5\n7455 3 4")
     printResult :: Int -> String -> String
     printResult a chaine = premiereRegle chaine ++ "--------\n" ++ printf "%.4f" (algoTriage a chaine)
+
+
+
+    --------------------------------------------------------------------------------------------------
+    -- Deuxieme regle
+    --------------------------------------------------------------------------------------------------
+
+    -- parserDouble: comme parserInt mais de String vers Double
+    parserDouble :: [[String]] -> [[Double]]
+    parserDouble = map (map (read :: String -> Double))
+
+    -- getWaitMaxFromPrio
+    getWaitMaxFromPrio :: Double -> Double
+    getWaitMaxFromPrio x
+                    | x == 2 = int2Double priorite2
+                    | x == 3 = int2Double priorite3
+                    | x == 4 = int2Double priorite4
+                    | x == 5 = int2Double priorite5
+                    | otherwise = error "Priorité non reconnue"
+
+    -- passe une liste de double en Int 
+    -- (devrait seulement être appliqué sur des Doules entiers pour pas perdre d'info)
+    listDoubleToInt :: [Double] -> [Int]
+    listDoubleToInt = map floor
+
+    -- On donne un score a chaque patient qui servira à les ordonner
+    -- giveWaitTime [1232, 5, 2] 15 = 0
+    -- giveWaitTime [ident, wait, prio] consultTime
+    giveWaitScore :: [Double] -> Double  -> Int
+    giveWaitScore xs g = floor ( ((getWaitMaxFromPrio (xs!!2)) - (xs!!1)) / g )
+
+    -- On ajoute le score (nbr de séance d'attente permise)
+    -- ex.: [1222, 5, 2] -> [1222, 5, 2, 0]
+    -- ex.: [1222, 0, 2] -> [1222, 0, 2, 1]
+    addWaitScore :: [Double] -> Double -> [Int]
+    addWaitScore xs g = listDoubleToInt xs ++ [giveWaitScore xs g]
+
+    -- on ajoute les scores pour chaque
+    addAllWaitScore :: [[Double ]] -> Double -> [[Int]]
+    addAllWaitScore [] g = []
+    addAllWaitScore [x] g = [addWaitScore x g]
+    addAllWaitScore (x:xs) g = addWaitScore x g : addAllWaitScore xs g
+
+    -- aPrioSur A B: Indique si l'élément du tableau A va être ordonné avant celui
+    -- du tableau B, si oui on retourne True sinon False
+    -- aPrioSur [1222, 5, 2, 0] [1222, 0, 2, 1] = True
+    aPrioSur :: [Int] -> [Int] -> Bool
+    aPrioSur xs ys
+                | xs!!3 < ys!!3 = True
+                | (xs!!3 > ys!!3) && (xs!!3 >= 0) && (ys!!3 < 0)= True
+                | (xs!!3 == ys!!3) && (xs!!2 < ys!!2) = True
+                | (xs!!3 == ys!!3) && (xs!!2 == ys!!2) && (xs!!1 >= ys!!1) = True
+                | otherwise = False
+
+    -- trouvePrio A B: Donne celui qui a priorité entre A et B
+    trouvePrio :: [Int] -> [Int] -> [Int]
+    trouvePrio xs ys
+                | aPrioSur xs ys = xs
+                | otherwise = ys
+
+    -- trouveAllPrio A: Donne celui qui a la plus haute priorité dans tout A
+    trouveAllPrio :: [[Int]] -> [Int]
+    trouveAllPrio [] = []
+    trouveAllPrio [xs] = xs
+    trouveAllPrio (x:xs) = trouvePrio x (trouveAllPrio xs)
+
+    -- deleteElementDeList: supprime une des listes de la liste de liste
+    deleteElementDeList :: [[Int]] -> [Int] -> [[Int]]
+    deleteElementDeList [] _ = []
+    deleteElementDeList [x] y
+                            | x == y = []
+                            | otherwise = [x]
+    deleteElementDeList (x:xs) y
+                                | x == y = xs
+                                | otherwise = x : deleteElementDeList xs y
+
+    -- enleverUnAuScore: pour enlever 1 au score (correspond au nombre de séance d'attente possible)
+    -- si l'élément n'est pas passé 
+    -- la liste doit être de taille 4 soit [a, a, a, a] pour fonctionner
+    enleverUnAuScore :: [Int] -> [Int]
+    enleverUnAuScore xs = (init xs) ++ [(last xs) - 1]
+
+    -- enleverUnAuScoreAll: appliquer enleverUnAuScore sur toute la liste de liste
+    enleverUnAuScoreAll :: [[Int]] -> [[Int]]
+    enleverUnAuScoreAll = map enleverUnAuScore
+
+    -- enleverScore: on enleve le score de la liste
+    -- doit suivre la forme [a, a, a, score]
+    enleverScore :: [Int] -> [Int]
+    enleverScore = init
+
+
+    -- mettreEnOrdreDePrio: création de la liste selon l'ordre de priorité (règle 2 et règle 1)
+    -- ex.: mettreEnOrdreDePrio [[1222, 0, 2, 1], [1211, 5, 2, 0]] => [[1211, 5, 2, 0], [1222, 0, 2, 0]]
+    mettreEnOrdreDePrio :: [[Int]] -> [[Int]]
+    mettreEnOrdreDePrio [] = []
+    mettreEnOrdreDePrio [xs] = [xs]
+    mettreEnOrdreDePrio xs = trouveAllPrio xs : mettreEnOrdreDePrio (enleverUnAuScoreAll(deleteElementDeList xs (trouveAllPrio xs)))
+
+    -- enleverScoreAll: maintenant qu'on a une liste ordonnée selon le score on peut enlever le score
+    enleverScoreAll :: [[Int]] -> [[Int]]
+    enleverScoreAll = map enleverScore
+
+    -- regleDeux: ordonnancement total selon la regle 2 et 1
+    -- regleDeux [listes] consultTime
+    regleDeux :: [[Double]] -> Double  -> [[Int]]
+    regleDeux xs g = enleverScoreAll (mettreEnOrdreDePrio (addAllWaitScore xs g))
+
+    -- regleDeuxTimeInt: regleDeux mais le temps est pris en Int
+    regleDeuxTimeInt :: [[Double]] -> Int -> [[Int]]
+    regleDeuxTimeInt xs g = regleDeux xs (int2Double g)
+
+    -- regleDeuxFullInt: regleDeux mais toutes les valeurs sont prises en Int
+    regleDeuxFullInt :: [[Int]] -> Int -> [[Int]]
+    regleDeuxFullInt xs g = regleDeux (allInt2Double xs) (int2Double g)
+
+    allInt2Double :: [[Int]] -> [[Double]]
+    allInt2Double [] = []
+    allInt2Double [xs] = [map int2Double xs]
+    allInt2Double (x:xs) = (map int2Double x) : allInt2Double xs
+
+
 
 
