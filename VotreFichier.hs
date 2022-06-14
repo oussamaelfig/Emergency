@@ -1,4 +1,6 @@
-
+-- Auteurs:
+-- 
+-- Zacharie Chenail-Larcher (CHEZ24069706)
 
 module Main where
     import System.Environment
