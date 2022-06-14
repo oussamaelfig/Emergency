@@ -168,6 +168,25 @@
     calculFractil = map divisionTuple
 
 
+
+-- ***********************************************************
+    convertTupleFrac :: [Double] -> [(Int,Double)]
+    convertTupleFrac = zipWith (\i a -> (i, a)) [2..]
+
+
+
+    displayFrac :: (Int,Double) -> String
+    displayFrac (a,b) = printf "%s" (show a++" "++show b)
+
+
+ 
+    displayFrac' :: [(Int, Double)] -> [String]
+    displayFrac' = map displayFrac
+
+-- ***********************************************************
+
+
+
     --Fonction qui calcule la moeyenne geometrique de la liste des fractile
     --[0.3,0,0,1] ==> (0.3*0*0.1)^0.25 = 0
     calculMoyenneGeo :: [Double] -> Double

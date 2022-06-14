@@ -73,10 +73,10 @@ module Main where
 
 
     --Convertir ma liste des listes de Int en une liste de Tuples contenant les éléments à afficher
-    --[[43525,5,2],[7455,3,4],[25545,7,5]] --> [(1,43525,5),(2,7455,3),(3,25545,7)]
+    --[[43525,5,2],[7455,3,4],[25545,7,5]] --> [(1,43525,2),(2,7455,4),(3,25545,5)]
     convertTuple :: [[Int]] -> [(Int, Int, Int)]
     --convertTuple (x:xs) = zipWith (curry (\x -> (fst x,head (snd x), snd x!!2))) [1..] (x:xs)
-    convertTuple = zipWith (\i (a:b:_) -> (i, a, b)) [1..]
+    convertTuple = zipWith (\i (a:b:c:_) -> (i, a, c)) [1..]
 
 
 
@@ -206,10 +206,31 @@ module Main where
     algoTriage ::Int -> String -> Double
     algoTriage a chaine= calculMoyenneGeo(calculFractil (donneeFractileTout(comparerParPriorite (groupElemMemePriorite (tupleInfo (sortString chaine) a)))))
 
+
+
+    -- ----------------------------------------------------------------------------------------
+    convertTupleFrac :: [Double] -> [(Int,Double)]
+    convertTupleFrac = zipWith (\i a -> (i, a)) [2..]
+
+
+
+    displayFrac :: (Int,Double) -> String
+    displayFrac (a,b) = printf "%s" (show a++" "++show b)
+
+
+ 
+    displayFrac' :: [(Int, Double)] -> [String]
+    displayFrac' = map displayFrac
+
+
+
+    chaineFractile :: String -> Int -> String
+    chaineFractile chaine a = unlines (displayFrac'(convertTupleFrac(calculFractil (donneeFractileTout(comparerParPriorite (groupElemMemePriorite (tupleInfo (sortString chaine) a)))))))
     -------------------------------------------------------------------------------------------------------------------------------
     -- premiereRegle "43525 5 2\n25545 7 5\n7455 3 4" *> print (algoTriage 20 "43525 5 2\n25545 7 5\n7455 3 4")
     printResult :: Int -> String -> String
-    printResult a chaine = premiereRegle chaine ++ "--------\n" ++ printf "%.4f" (algoTriage a chaine)
+    printResult a chaine = premiereRegle chaine ++ "--------\n" ++ (chaineFractile chaine a) ++ printf "%.4f" (algoTriage a chaine)
+
 
 
 
