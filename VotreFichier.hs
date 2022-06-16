@@ -114,13 +114,9 @@ module Main where
     display' :: [(Int, Int, Int)] -> [String]
     display' = map display
 
-    --fonction qui combine toute les autres fonctions
+
+    --fonction qui combine toute les autres fonctions de la premiere et deuxieme regles
     --prend la chaine initial et retourne la liste des patients ordonné
-    -- "43525 5 2\n25545 7 5\n7455 3 4" --> "1 43525 5\n2 7455 3\n3 25545 7\n"
-    premiereRegle :: String -> String
-    premiereRegle x = unlines (display' (convertTuple (sortString x)))
-
-
     premDeuxiemeRegle :: String -> Int ->String
     premDeuxiemeRegle x tc = unlines (display' (convertTuple (regleDeuxFullInt (sortString x) tc)))
 
@@ -205,9 +201,6 @@ module Main where
     --Algorithme final pour trouver la moyenn geometrique
     algoTriage ::Int -> String -> Double
     algoTriage a chaine = calculMoyenneGeo(calculFractil (donneeFractileTout( scoreEnBoolGen (regleDeuxFullInt (sortString chaine) a))))
-
-    -- algoTriage a chaine= calculMoyenneGeo(calculFractil (donneeFractileTout(comparerParPriorite (groupElemMemePriorite (tupleInfo (sortString chaine) a)))))
-
 
 
     -- fonction qui prend une liste de fractile et la convertit en liste de tuples pour chaque priorité son fractile
