@@ -228,10 +228,12 @@ module Main where
 
 
     --Algorithme final pour trouver la moyenn geometrique
+    --algoTriage ::Int -> String -> Double
+    --algoTriage a chaine= calculMoyenneGeo(calculFractil (donneeFractileTout(comparerParPriorite (groupElemMemePriorite (tupleInfo (sortString chaine) a)))))
+
+    -- -----------------------------------------------------------------------------
     algoTriage ::Int -> String -> Double
-    algoTriage a chaine= calculMoyenneGeo(calculFractil (donneeFractileTout(comparerParPriorite (groupElemMemePriorite (tupleInfo (sortString chaine) a)))))
-
-
+    algoTriage a chaine = calculMoyenneGeo(calculFractil (donneeFractileTout( scoreEnBoolGen (regleDeuxFullInt (sortString chaine) a))))
 
     -- ----------------------------------------------------------------------------------------
     convertTupleFrac :: [Double] -> [(Int,Double)]
@@ -250,7 +252,7 @@ module Main where
 
 
     chaineFractile :: String -> Int -> String
-    chaineFractile chaine a = unlines (displayFrac'(convertTupleFrac(calculFractil (donneeFractileTout(comparerParPriorite (groupElemMemePriorite (tupleInfo (sortString chaine) a)))))))
+    chaineFractile chaine a = unlines (displayFrac'(convertTupleFrac(calculFractil (donneeFractileTout( scoreEnBoolGen (regleDeuxFullInt (sortString chaine) a))))))
     -------------------------------------------------------------------------------------------------------------------------------
     -- premiereRegle "43525 5 2\n25545 7 5\n7455 3 4" *> print (algoTriage 20 "43525 5 2\n25545 7 5\n7455 3 4")
     printResult :: Int -> String -> String
@@ -435,10 +437,11 @@ module Main where
     enleverScoreAll :: [[Int]] -> [[Int]]
     enleverScoreAll = map enleverScore
 
-    -- regleDeux: ordonnancement total selon la regle 2 et 1
+     -- regleDeux: ordonnancement total selon la regle 2 et 1
     -- regleDeux [listes] consultTime
     regleDeux :: [[Double]] -> Double  -> [[Int]]
-    regleDeux xs g = enleverScoreAll (mettreEnOrdreDePrio (addAllWaitScore xs g))
+    regleDeux xs g = mettreEnOrdreDePrio (addAllWaitScore xs g)
+    -- regleDeux xs g = enleverScoreAll (mettreEnOrdreDePrio (addAllWaitScore xs g))
 
     -- regleDeuxTimeInt: regleDeux mais le temps est pris en Int
     regleDeuxTimeInt :: [[Double]] -> Int -> [[Int]]
@@ -453,6 +456,20 @@ module Main where
     allInt2Double [xs] = [map int2Double xs]
     allInt2Double (x:xs) = (map int2Double x) : allInt2Double xs
     ------------------------------------------------------------------------------------------
+
+
+    scoreEnBool :: [Int] -> Bool
+    scoreEnBool xs | xs!!3 >= 0 = True
+                   | otherwise = False 
+
+    scoreEnBoolParPrio :: [[Int]] -> [Bool]
+    scoreEnBoolParPrio = map scoreEnBool
+
+
+    scoreEnBoolGen :: [[Int]] -> [[Bool]]
+    scoreEnBoolGen [] = []
+    scoreEnBoolGen xs = map scoreEnBoolParPrio (grouperParPrioNoEmpty xs)
+
 
 
     -- La fonction traitement est le point de départ de votre logiciel.
