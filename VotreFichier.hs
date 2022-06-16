@@ -245,7 +245,9 @@ module Main where
     parserDouble :: [[String]] -> [[Double]]
     parserDouble = map (map (read :: String -> Double))
 
-    -- getWaitMaxFromPrio
+    -- Fonction qui retourne l'attente max selon la priorité
+    -- un score : correspond au nombre de séances qui peuvent se passer avant que le patient passe
+    -- lorsque c'est négatif cela signifie qu'il aurait dû passé avant pour être a temps et qu'il est donc consulté en retard  tel que si le score = -1
     getWaitMaxFromPrio :: Double -> Double
     getWaitMaxFromPrio x
                     | x == 2 = int2Double priorite2
@@ -271,6 +273,7 @@ module Main where
     addWaitScore :: [Double] -> Double -> [Int]
     addWaitScore xs g = listDoubleToInt xs ++ [giveWaitScore xs g]
 
+    -- Fonction qui donne un score pour chaque patient
     -- on ajoute les scores pour chaque
     addAllWaitScore :: [[Double ]] -> Double -> [[Int]]
     addAllWaitScore [] g = []
@@ -310,6 +313,7 @@ module Main where
                     | otherwise = x : removeEmptyList xs
 
     -- grouperParPrio mais sans les listes vides
+    -- regroupe les patients selon leur priorité, mais sans groupe vide
     grouperParPrioNoEmpty :: [[Int]] -> [[[Int]]]
     grouperParPrioNoEmpty xs = removeEmptyList (grouperParPrio xs)
     ------------------------------------------------------------------------------------------
@@ -421,7 +425,6 @@ module Main where
     -- regleDeux [listes] consultTime
     regleDeux :: [[Double]] -> Double  -> [[Int]]
     regleDeux xs g = mettreEnOrdreDePrio (addAllWaitScore xs g)
-    -- regleDeux xs g = enleverScoreAll (mettreEnOrdreDePrio (addAllWaitScore xs g))
 
     -- regleDeuxTimeInt: regleDeux mais le temps est pris en Int
     regleDeuxTimeInt :: [[Double]] -> Int -> [[Int]]
@@ -431,6 +434,7 @@ module Main where
     regleDeuxFullInt :: [[Int]] -> Int -> [[Int]]
     regleDeuxFullInt xs g = regleDeux (allInt2Double xs) (int2Double g)
 
+    -- Fonction plus generale de Int2Double application de map sur Int2Double
     allInt2Double :: [[Int]] -> [[Double]]
     allInt2Double [] = []
     allInt2Double [xs] = [map int2Double xs]
