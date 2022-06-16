@@ -6,22 +6,22 @@ module Main where
     import System.Environment
     import Data.List ( elemIndex, sortBy, groupBy )
     import GHC.Float (int2Double)
-    import Data.Char  
+    import Data.Char
     import Text.Printf
     import Control.Arrow
     import Distribution.Compat.CharParsing (CharParsing(string))
 
-    
+
     -- Constantes :
     tcMinimum = 1
     tcParDefaut = 15
-    
+
     positionArgumentNomFichier = 0
     positionArgumentTc = 1
-    
+
     mssgErreurPremierArgument = "Il faut le nom du fichier comme premier argument."
     mssgErreurDeuxiemeArgument = "Le deuxieme argument doit être plus grand ou égal a " ++ ( show tcMinimum )
-    
+
     -- main
     main = do
                argv <- getArgs
@@ -30,16 +30,16 @@ module Main where
                tc' <- return ( if positionArgumentTc < argc
                                then read (argv !! positionArgumentTc) :: Int
                                else tcParDefaut )
-               tc <- return ( if tcMinimum <= tc' 
-                              then tc' 
+               tc <- return ( if tcMinimum <= tc'
+                              then tc'
                               else error mssgErreurDeuxiemeArgument )
-               contenu <- if positionArgumentNomFichier < argc 
-                          then readFile nomFichierEntrees 
+               contenu <- if positionArgumentNomFichier < argc
+                          then readFile nomFichierEntrees
                           else error mssgErreurPremierArgument
                putStr ( traitement tc contenu )
 
     -- Votre programme ici :
-    
+
     --Fonction qui prends la chaine et la convertis en liste de chaque ligne
     --"43525 5 2\n25545 7 5\n7455 3 4" --> [43525 5 2, 25545 7 5, 7455 3 4]
     formaterDonnes :: String -> [String]
@@ -148,7 +148,7 @@ module Main where
 
 
 
-    
+
     --declaration des constantes: 
     --temps d'attente maximum:
     priorite2 = 15
@@ -243,7 +243,7 @@ module Main where
     displayFrac (a,b) = printf "%s" (show a++" "++show b)
 
 
- 
+
     displayFrac' :: [(Int, Double)] -> [String]
     displayFrac' = map displayFrac
 
@@ -297,31 +297,107 @@ module Main where
     addAllWaitScore [x] g = [addWaitScore x g]
     addAllWaitScore (x:xs) g = addWaitScore x g : addAllWaitScore xs g
 
+    
+    -----------------------------------------------------------------------------------------
+    -- Grouper les patients selon les priorités
+    -----------------------------------------------------------------------------------------
+    -- creerGroupePrio: cré un groupe de patients de même prio
+    -- ex.: creerGroupePrio 2 [[101, 1, 2, 0], [102, 2, 2, 0], [201, 3, 3, 1]] -> [[101, 1, 2, 0], [102, 2, 2, 0]]
+    creerGroupePrio :: Int -> [[Int]] -> [[Int]]
+    creerGroupePrio _ [] = []
+    creerGroupePrio p [x]
+                        | x!!2 == p = [x]
+                        | otherwise = []
+    creerGroupePrio p (x:xs)
+                        | x!!2 == p = x : creerGroupePrio p xs
+                        | otherwise = creerGroupePrio p xs
+
+    -- grouperParPrio: regroupe les patients de meme prio ensemble
+    -- ex.: grouperParPrio [[101, 1, 2, 0], [102, 2, 2, 0], [201, 3, 3, 1]] -> [[[101, 1, 2, 0], [102, 2, 2, 0]], [[201, 3, 3, 1]]]
+    grouperParPrio :: [[Int]] -> [[[Int]]]
+    grouperParPrio xs = creerGroupePrio 2 xs : [creerGroupePrio 3 xs] ++ [creerGroupePrio 4 xs] ++ [creerGroupePrio 5 xs]
+
+    -- enleve les listes vides
+    removeEmptyList :: [[[Int]]] -> [[[Int]]]
+    removeEmptyList [] = []
+    removeEmptyList [[]] = []
+    removeEmptyList [x]
+                    | x == [] = []
+                    | otherwise = [x]
+    removeEmptyList (x:xs)
+                    | x == [] = removeEmptyList xs
+                    | otherwise = x : removeEmptyList xs
+
+    -- grouperParPrio mais sans les listes vides
+    grouperParPrioNoEmpty :: [[Int]] -> [[[Int]]]
+    grouperParPrioNoEmpty xs = removeEmptyList (grouperParPrio xs)
+    ------------------------------------------------------------------------------------------
+
+    ------------------------------------------------------------------------------------------
+    -- Application de la première règle
+    ------------------------------------------------------------------------------------------
+    -- comparePremRegle: retourne entre deux patients de même prio, lequel a priorité sur l'autre
+    comparePremRegle :: [Int] -> [Int] -> [Int]
+    comparePremRegle xs ys
+                        | xs!!1 >= ys!!1 = xs
+                        | otherwise = ys
+
+    -- appPremiereRegle: a partir d'un groupe de patients de même prio, retourne celui
+    -- qui doit passer avant
+    appPremiereRegle :: [[Int]] -> [Int]
+    appPremiereRegle [] = []
+    appPremiereRegle [xs] = xs
+    appPremiereRegle (x:xs) = comparePremRegle x (appPremiereRegle xs)
+
+    -- premierChaquePrio: a partir de liste de groupe, donne une liste avec celui qui devrait
+    -- passer avant pour chaque groupe
+    premierChaquePrio :: [[[Int]]] -> [[Int]]
+    premierChaquePrio = map appPremiereRegle
+    ------------------------------------------------------------------------------------------
+
+    ------------------------------------------------------------------------------------------
+    -- Algorithme deuxième règle
+    ------------------------------------------------------------------------------------------
     -- aPrioSur A B: Indique si l'élément du tableau A va être ordonné avant celui
-    -- du tableau B, si oui on retourne True sinon False
+    -- du tableau B, si oui on retourne True sinon False, devrait être utilisé pour comparer
+    -- des patients de priorités différentes
     -- aPrioSur [1222, 5, 2, 0] [1222, 0, 2, 1] = True
     aPrioSur :: [Int] -> [Int] -> Bool
     aPrioSur xs ys
-                | (xs!!2 == ys!!2) && (xs!!3 < ys!!3) = True
-                | (xs!!2 == ys!!2) && (xs!!3 == ys!!3) && (xs!!1 >= ys!!1) = True
-                | (xs!!2 /= ys!!2) && (xs!!3 >= 0) && (ys!!3 < 0) = True 
+                | (xs!!2 == ys!!2) && (xs!!1 >= ys!!1) = True
+                | (xs!!2 /= ys!!2) && (xs!!3 >= 0) && (ys!!3 < 0) = True
                 | (xs!!2 /= ys!!2) && (xs!!3 < ys!!3) && (xs!!3 >= 0) = True
                 | (xs!!2 /= ys!!2) && (xs!!3 < ys!!3) && (ys!!3 < 0) = True
-                | (xs!!2 < ys!!2) && (xs!!3 == ys!!3) = True 
-                | otherwise = False  
+                | (xs!!2 < ys!!2) && (xs!!3 == ys!!3) = True
+                | otherwise = False
 
-    -- trouvePrio A B: Donne celui qui a priorité entre A et B
+    -- trouvePrio A B: Donne celui qui va passer avant entre A et B
+    -- devrait être utilisé sur des patients de différentes priorités
     trouvePrio :: [Int] -> [Int] -> [Int]
     trouvePrio xs ys
                 | aPrioSur xs ys = xs
-                | otherwise = ys
+                | otherwise = ys    
 
     -- trouveAllPrio A: Donne celui qui a la plus haute priorité dans tout A
+    -- devrait être appliqué sur les patients qui passe avant pour chaque prio
     trouveAllPrio :: [[Int]] -> [Int]
     trouveAllPrio [] = []
     trouveAllPrio [xs] = xs
     trouveAllPrio (x:xs) = trouvePrio x (trouveAllPrio xs)
+    ------------------------------------------------------------------------------------------
 
+    ------------------------------------------------------------------------------------------
+    -- regle 1 et 2 ensemble
+    ------------------------------------------------------------------------------------------
+    -- prochainAPasser: Choisi le prochain patient qui va passer
+    -- applique la premiere regle et l'algo de la deuxieme
+    prochainAPasser :: [[Int]] -> [Int]
+    prochainAPasser xs = trouveAllPrio (premierChaquePrio (grouperParPrioNoEmpty xs))
+    ------------------------------------------------------------------------------------------
+
+    ------------------------------------------------------------------------------------------
+    -- Regroupement du traitement d'ordonnancement et clean up
+    ------------------------------------------------------------------------------------------
     -- deleteElementDeList: supprime une des listes de la liste de liste
     deleteElementDeList :: [[Int]] -> [Int] -> [[Int]]
     deleteElementDeList [] _ = []
@@ -353,7 +429,7 @@ module Main where
     mettreEnOrdreDePrio :: [[Int]] -> [[Int]]
     mettreEnOrdreDePrio [] = []
     mettreEnOrdreDePrio [xs] = [xs]
-    mettreEnOrdreDePrio xs = trouveAllPrio xs : mettreEnOrdreDePrio (enleverUnAuScoreAll(deleteElementDeList xs (trouveAllPrio xs)))
+    mettreEnOrdreDePrio xs = prochainAPasser xs : mettreEnOrdreDePrio (enleverUnAuScoreAll(deleteElementDeList xs (prochainAPasser xs)))
 
     -- enleverScoreAll: maintenant qu'on a une liste ordonnée selon le score on peut enlever le score
     enleverScoreAll :: [[Int]] -> [[Int]]
@@ -376,6 +452,7 @@ module Main where
     allInt2Double [] = []
     allInt2Double [xs] = [map int2Double xs]
     allInt2Double (x:xs) = (map int2Double x) : allInt2Double xs
+    ------------------------------------------------------------------------------------------
 
 
     -- La fonction traitement est le point de départ de votre logiciel.
