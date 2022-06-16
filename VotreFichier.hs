@@ -95,10 +95,10 @@ module Main where
     sortString x = verifAllPatient (sortStrings x)
     -------------------------------------------------------------------------------------------------
 
+
     --Convertir ma liste des listes de Int en une liste de Tuples contenant les éléments à afficher
     --[[43525,5,2],[7455,3,4],[25545,7,5]] --> [(1,43525,2),(2,7455,4),(3,25545,5)]
     convertTuple :: [[Int]] -> [(Int, Int, Int)]
-    --convertTuple (x:xs) = zipWith (curry (\x -> (fst x,head (snd x), snd x!!2))) [1..] (x:xs)
     convertTuple = zipWith (\i (a:b:c:_) -> (i, a, c)) [1..]
 
 
@@ -121,31 +121,8 @@ module Main where
     premiereRegle x = unlines (display' (convertTuple (sortString x)))
 
 
-
-    --Pour tester :
-    -- premiereRegle "43525 5 2\n25545 7 5\n7455 3 4"
-
-
     premDeuxiemeRegle :: String -> Int ->String
     premDeuxiemeRegle x tc = unlines (display' (convertTuple (regleDeuxFullInt (sortString x) tc)))
-
-    -- **************************************************************************************
-    --Creation d'un data Type Patient
-    data Patient = Patient { patientId :: Int, patientTemps :: Int, patientPriorite :: Int } deriving (Show)
-
-
-    --cette fonction prend la liste des lists de Int et la convertit en une liste des patients
-    -- [[1234, 5, 2], [4568, 7, 3], [7897, 6, 5]] ==>[
-                                                     --Patient {patientId = 1234, patientTemps = 5, patientPriorite = 2},
-                                                     --Patient {patientId = 4568, patientTemps = 7, patientPriorite = 3},
-                                                     --Patient {patientId = 7897, patientTemps = 6, patientPriorite = 5}
-                                                     --]
-    creerListPatient :: [[Int]] -> [Patient]
-    creerListPatient = map (\[a, b, c] -> Patient a b c)
-
-    -- **************************************************************************************
-
-
 
 
     --declaration des constantes: 
@@ -166,7 +143,6 @@ module Main where
     tupleInfo list a =  zipWith (\[_,x,y] i -> (x+a*i,y)) list [0..]
 
 
-    --groupBy :: ((a0, a2) -> (a1, a2) -> Bool) -> t0 -> [[(Int, Int)]]
 
     --Grouper les elements par prioritée chaque priorité dans une liste à part
     --[(3,2),(17,2),(50,3),(64,3)] ==> [[(3,2),(17,2)],[(50,3),(64,3)]]
@@ -227,38 +203,48 @@ module Main where
 
 
     --Algorithme final pour trouver la moyenn geometrique
-    --algoTriage ::Int -> String -> Double
-    --algoTriage a chaine= calculMoyenneGeo(calculFractil (donneeFractileTout(comparerParPriorite (groupElemMemePriorite (tupleInfo (sortString chaine) a)))))
-
-    -- -----------------------------------------------------------------------------
     algoTriage ::Int -> String -> Double
     algoTriage a chaine = calculMoyenneGeo(calculFractil (donneeFractileTout( scoreEnBoolGen (regleDeuxFullInt (sortString chaine) a))))
 
-    -- ----------------------------------------------------------------------------------------
+    -- algoTriage a chaine= calculMoyenneGeo(calculFractil (donneeFractileTout(comparerParPriorite (groupElemMemePriorite (tupleInfo (sortString chaine) a)))))
+
+
+
+    -- fonction qui prend une liste de fractile et la convertit en liste de tuples pour chaque priorité son fractile
+    -- [0.3, 0.88, 0.68, 0.12] ==> [(2,0.3),(3,0.88),(4,0.68),(5,0.12)]
     convertTupleFrac :: [Double] -> [(Int,Double)]
     convertTupleFrac = zipWith (\i a -> (i, a)) [2..]
 
 
-
+    -- fonction qui prend un tuple de fractile avec leur priorité et la convertit en chaine pour les afficher
+    -- (2,0.3),(3,0.88),(4,0.68),(5,0.12) ==> 2 0.3
+                                            --3 0.88
+                                            --4 0.68
+                                            --5 0.12
     displayFrac :: (Int,Double) -> String
     displayFrac (a,b) = printf "%s" (show a++" "++show b)
 
 
-
+    --Fonction qui prend la liste des tuple de fractiles avec leurs priorités et la convertit en une chaine 
+    --[(2,0.3),(3,0.88),(4,0.68),(5,0.12)] ==> 2 0.3
+                                            --3 0.88
+                                            --4 0.68
+                                            --5 0.12
     displayFrac' :: [(Int, Double)] -> [String]
     displayFrac' = map displayFrac
 
 
-
+    --Fonction qui combine le tout pour afficher la chaine finale des fractiles avec leurs priorités
+    -- elle prend la chaine initiale avec son temps consultation
     chaineFractile :: String -> Int -> String
     chaineFractile chaine a = unlines (displayFrac'(convertTupleFrac(calculFractil (donneeFractileTout( scoreEnBoolGen (regleDeuxFullInt (sortString chaine) a))))))
-    -------------------------------------------------------------------------------------------------------------------------------
-    -- premiereRegle "43525 5 2\n25545 7 5\n7455 3 4" *> print (algoTriage 20 "43525 5 2\n25545 7 5\n7455 3 4")
+
+
+    -- Fontion qui affiche le resultat final les patients ordonnés selon la premiere regle ainsi leurs fractile et la moyenne geometrique
     printResult :: Int -> String -> String
-    printResult a chaine = premDeuxiemeRegle chaine a ++ "--------\n" ++ (chaineFractile chaine a) ++ printf "%.4f" (algoTriage a chaine)
+    printResult a chaine = premDeuxiemeRegle chaine a ++ "--------\n" ++ (chaineFractile chaine a) ++ printf "%f" (algoTriage a chaine)
 
-
---------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
     -- Deuxieme regle
     --------------------------------------------------------------------------------------------------
 
@@ -298,7 +284,7 @@ module Main where
     addAllWaitScore [x] g = [addWaitScore x g]
     addAllWaitScore (x:xs) g = addWaitScore x g : addAllWaitScore xs g
 
-    
+
     -----------------------------------------------------------------------------------------
     -- Grouper les patients selon les priorités
     -----------------------------------------------------------------------------------------
@@ -373,12 +359,13 @@ module Main where
                 | (xs!!2 < ys!!2) && (xs!!3 == ys!!3) = True
                 | otherwise = False
 
+
     -- trouvePrio A B: Donne celui qui va passer avant entre A et B
     -- devrait être utilisé sur des patients de différentes priorités
     trouvePrio :: [Int] -> [Int] -> [Int]
     trouvePrio xs ys
                 | aPrioSur xs ys = xs
-                | otherwise = ys    
+                | otherwise = ys
 
     -- trouveAllPrio A: Donne celui qui a la plus haute priorité dans tout A
     -- devrait être appliqué sur les patients qui passe avant pour chaque prio
@@ -457,15 +444,18 @@ module Main where
     allInt2Double (x:xs) = (map int2Double x) : allInt2Double xs
     ------------------------------------------------------------------------------------------
 
-
+    -- Fonction qui convertit une liste de score en boolean
+    -- Si le score est inferieur à 0 ==> False
     scoreEnBool :: [Int] -> Bool
     scoreEnBool xs | xs!!3 >= 0 = True
-                   | otherwise = False 
+                   | otherwise = False
 
+    -- Fonction finale qui convertit une liste des patients avec leur score 
+    -- en liste de Boolean ceux qui sont passee à temps et ceux que non
     scoreEnBoolParPrio :: [[Int]] -> [Bool]
     scoreEnBoolParPrio = map scoreEnBool
 
-
+    -- Fonction generale de scoreEnBool
     scoreEnBoolGen :: [[Int]] -> [[Bool]]
     scoreEnBoolGen [] = []
     scoreEnBoolGen xs = map scoreEnBoolParPrio (grouperParPrioNoEmpty xs)
@@ -482,4 +472,4 @@ module Main where
     --        a la fin de l'exécution du programme.  Elle devra contenir le nouvel
     --        ordre des patients et la table des fractiles formatés pour l'affichage.
     traitement :: Int -> String -> String
-    traitement tc contenu = printResult tc contenu
+    traitement = printResult
