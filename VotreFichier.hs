@@ -1,5 +1,5 @@
 -- Auteurs:
--- 
+-- OUSSAMA EL-FIGHA (ELFO74030209)
 -- Zacharie Chenail-Larcher (CHEZ24069706)
 
 module Main where
@@ -94,7 +94,6 @@ module Main where
     sortString :: String -> [[Int]]
     sortString x = verifAllPatient (sortStrings x)
     -------------------------------------------------------------------------------------------------
-
 
     --Convertir ma liste des listes de Int en une liste de Tuples contenant les éléments à afficher
     --[[43525,5,2],[7455,3,4],[25545,7,5]] --> [(1,43525,2),(2,7455,4),(3,25545,5)]
@@ -315,6 +314,7 @@ module Main where
                         | otherwise = creerGroupePrio p xs
 
     -- grouperParPrio: regroupe les patients de meme prio ensemble
+    -- il met les groupes de priorités en ordre : [[groupe prio 2],[groupe prio 3],[groupe prio 4],[groupe prio 5]]
     -- ex.: grouperParPrio [[101, 1, 2, 0], [102, 2, 2, 0], [201, 3, 3, 1]] -> [[[101, 1, 2, 0], [102, 2, 2, 0]], [[201, 3, 3, 1]]]
     grouperParPrio :: [[Int]] -> [[[Int]]]
     grouperParPrio xs = creerGroupePrio 2 xs : [creerGroupePrio 3 xs] ++ [creerGroupePrio 4 xs] ++ [creerGroupePrio 5 xs]
