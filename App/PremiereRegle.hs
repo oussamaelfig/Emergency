@@ -169,7 +169,6 @@
 
 
 
--- ***********************************************************
     convertTupleFrac :: [Double] -> [(Int,Double)]
     convertTupleFrac = zipWith (\i a -> (i, a)) [2..]
 
@@ -183,7 +182,6 @@
     displayFrac' :: [(Int, Double)] -> [String]
     displayFrac' = map displayFrac
 
--- ***********************************************************
 
 
 
